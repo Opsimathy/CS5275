@@ -1,0 +1,103 @@
+\documentclass[12pt]{article}
+\usepackage[a4paper, margin=1in]{geometry}
+\usepackage{amsmath, amssymb, hyperref, enumitem, bbm}
+\DeclareMathOperator{\vol}{vol}
+\DeclareMathOperator{\LR}{LR}
+\DeclareMathOperator{\OPT}{OPT}
+\DeclareMathOperator{\e}{e}
+\DeclareMathOperator{\dist}{\mathsf{dist}}
+\DeclareMathOperator{\E}{\mathbb{E}}
+\DeclareMathOperator{\xb}{\mathbf{x}}
+\DeclareMathOperator{\Bin}{Bin}
+\newcommand\mr{\mathrm}
+\newcommand\mb{\mathbf}
+\title{CS5275 Tutorial Problem Set 1}
+\author{Li Jiaru}
+\date{\today}
+\begin{document}
+\maketitle
+\paragraph{Problem 1}
+\begin{enumerate}
+\item
+Take the graph $H=(V, E_H)$ where $E_H=\{\{s,t\}\}$.
+
+Recall that the generalised conductance is defined by
+$$\Phi(G,H)=\min_{S:E_H(S,V\setminus S)\ne\varnothing}\frac{|E_G(S,V\setminus S)|}{|E_H(S,V\setminus S)|}.$$
+Note that when $E_H(S,V\setminus S)\ne\varnothing$, we must have $\{s,t\}\in E_H(S,V\setminus S)$. WLOG say $s\in S$ and $t\in V\setminus S$.
+
+Noticing that $|E_H(S,V\setminus S)|=1$, we have
+$$\Phi(G,H)=\min_{S:s\in S\land t\in V\setminus S}|E_G(S,V\setminus S)|=\min_{S:s\in S\land t\in V\setminus S}|\{\{s,t\}\in E\}|,$$
+which is precisely the size of a minimum $s$–$t$ cut in $G$.
+\end{enumerate}
+\paragraph{Problem 2}
+First of all, recall the variational characterisation of $\lambda_2$ as
+$$\lambda_2(\mathbf{N})=\min_{\mathbf{x}\ne0,\mathbf{x}\perp\mathbf{v}_1}R_{\mathbf{N}}(\xb),$$
+where $\mb{v}_1=\mb{1}$, and the Rayleigh quotient can be expressed as
+$$R_{\mathbf{N}}(\xb)=\frac{\mathbf{x}^\top\mathbf{N}\mathbf{x}}{\mathbf{x}^\top\mathbf{x}}=\frac{\sum_{\{u,v\}\in E}(x_u-x_v)^2}{d\sum_{v\in V}x_v^2}.$$
+\begin{enumerate}
+\item
+Take the vector $\xb=(x_1, \dots,x_n)$ such that $x_i=\cos\left(\dfrac{2\pi i}{n}\right)$. Then $\displaystyle\sum_{i=1}^n x_i=0$, so $\xb\perp\mathbf{1}$ and thus $\lambda_2(\mathbf{N})\le R_{\mathbf{N}}(\xb)$.
+
+For an $n$-vertex cycle, we have $V=\{1,2,\dots,n\}$, $E=\{\{1,2\},\{2,3\},\dots,\{n-1,n\},\{n,1\}\}$ and $d=2$. Thus we can compute
+\begin{align*}
+\sum_{v\in V} x_v^2&=\sum_{i=1}^n x_i^2=\sum_{i=1}^n\cos^2\left(\dfrac{2\pi i}{n}\right)=\frac{n}{2},\\
+\sum_{\{u,v\}\in E}(x_u-x_v)^2&=\sum_{i=1}^{n-1} (x_i-x_{i+1})^2+(x_n-x_1)^2=2n\sin^2\left(\frac\pi n\right),
+\end{align*}
+and therefore, by $\sin x\le x$, we conclude that
+$$\lambda_2(\mathbf{N})\le R_{\mathbf{N}}(\xb)=\frac{2n\sin^2\left(\dfrac\pi n\right)}{2\cdot\dfrac{n}{2}}=2\sin^2\left(\dfrac\pi n\right)\le2\left(\dfrac\pi n\right)^2\in O\left(\frac 1 {n^2}\right).$$
+\item
+Recall that part of the Cheeger inequality states $\lambda_2\le2\Phi(G)$.
+
+To compute $\Phi(G)$, intuitively a cut across the two edges $\{u,w\}$ and $\{v,x\}$ yields the lowest conductance. Note that the resulting graph is still $d$-regular with $d=n/2-1$.
+
+For this cut, $S=A$ and $V\setminus S=B$. Thus $\min(\vol(S),\vol(V\setminus S))=d(n/2)=n(n-2)/4$ and $|E(S,V\setminus S)|=2$, and
+$$\Phi(S)=\frac{|E(S,V\setminus S)|}{\min(\vol(S),\vol(V\setminus S))}=\frac{2}{n(n-2)/4}\in O\left(\dfrac{1}{n^2}\right).$$
+Thus we have
+$$\lambda_2\le2\Phi(G)\le 2\Phi(S)\in O\left(\dfrac{1}{n^2}\right).$$
+\item
+As the diameter is at most $D$, for any two vertices, the shortest path connecting them has length $D'\le D$. Denote this path as $w_1, \dots, w_{D'}$. Let $\displaystyle M:=\max_{v\in V} x_v, m:=\min_{v\in V} x_v$. We have, via telescoping sum, that
+$$\sum_{i=1}^{D'-1}(x_{w_{i+1}}-x_{w_i})=x_{w_{D'}}-x_{w_1}\ge M-m,$$
+so by Cauchy-Schwarz inequality, we have
+$$\sum_{i=1}^{D'-1}(x_{w_{i+1}}-x_{w_i})^2\ge\frac{\left(\sum_{i=1}^{D'-1}(x_{w_{i+1}}-x_{w_i})\right)^2}{D'-1}\ge\frac{(M-m)^2}{D'-1}.$$
+Note that the sum of squared differences over all edges is greater than or equal to the sum of squared differences along the path, i.e.,
+$$\sum_{\{u,v\}\in E}(x_u-x_v)^2\ge\sum_{i=1}^{D'-1}(x_{w_{i+1}}-x_{w_i})^2\ge\frac{(M-m)^2}{D'-1}.$$
+As $\mathbf{x}\ne0,\mathbf{x}\perp\mathbf{1}$, we have $M>0>m$, so that $(M-m)^2>M^2$, and
+$$M^2=(\max_v x_v)^2=\max_v x_v^2\ge\frac{\sum_{v\in V}x_v^2}{n}.$$
+Therefore, we can now bound $R_{\mathbf{N}}(\xb)$ as
+$$R_{\mathbf{N}}(\xb)=\frac{\sum_{\{u,v\}\in E}(x_u-x_v)^2}{d\sum_{v\in V}x_v^2}\ge\frac{(M-m)^2/(D'-1)}{d(nM^2)}>\frac{1}{ndD},$$
+giving the bound $\lambda_2(\mathbf{N})\in\Omega(1/(ndD))$ as required.
+\end{enumerate}
+\paragraph{Problem 3}
+\begin{enumerate}
+\item
+We show that the function $p=\dfrac{C\log n}{n}\in O\left(\dfrac{\log n}{n}\right)$ satisfies the requirement for some large constant $C$.
+
+Recall that for $X\sim\Bin(n, p)$ with $\mu=\E[X]=np$, the Chernoff bounds state that, for $0\le\delta\le1$,
+$$\Pr[X\ge(1+\delta)\mu]\le\e^{-\frac{\delta^2\mu}{3}},\quad\Pr[X\le(1-\delta)\mu]\le\e^{-\frac{\delta^2\mu}{2}}.$$
+In the graph $G\sim\mathcal{G}(n,p)$, the degree for each vertex $v$ follows $\deg(v)\sim\Bin(n-1,p)$, so $\mu=(n-1)p=C\log n(1-1/n)\in\Theta(\log n)$. Taking $\delta=1/2$ gives
+$$\Pr\left[\deg(v)\ge\frac 3 2\mu\right]\le\e^{-\frac{\mu}{12}}=n^{-\frac{C}{12}\left(1-\frac 1 n\right)},\quad\Pr\left[\deg(v)\le\frac 1 2\mu\right]\le\e^{-\frac{\mu}{8}}=n^{-\frac{C}{8}\left(1-\frac 1 n\right)}.$$
+For large $n$ and $C$, we have
+$$\Pr\left[\deg(v)\not\in\left[\frac 1 2\mu, \frac 3 2\mu\right]\right]< n^{-C/12}+n^{-C/8}<\frac{1}{2n},$$
+i.e., $\deg(v)\in\Theta(\log n)$ for every $v\in V$ with probability at least $1-1/(2n)$.\hfill$(*)$
+
+Now consider any $S\subseteq V$ with $S\ne V$ and $S\ne\varnothing$. WLOG assume that $s=|S|\le n/2$. Then we have $|E(S,V\setminus S)|\sim\Bin(s(n-s),p)$. Then $\mu=s(n-s)p\ge s(n/2)(C\log n/n)=Cs\log n/2.$
+Therefore taking $\delta=1/2$ gives
+$$\Pr\left[|E(S,V\setminus S)|\le\frac{1}{2}\mu\right]\le\e^{-\frac{\mu}{8}}=n^{-\frac{Cs}{16}}.$$
+The total number of such sets $S$ is, via Stirling's approximation, $$\binom{n}{s}=\frac{n(n-1)\cdots(n-s+1)}{s!}\le\frac{n^s}{s!}\le\left(\frac{n\mathrm{e}}{s}\right)^s,$$
+so the probability
+$$\Pr\left[\exists S:|S|=k, |E(S,V\setminus S)|\le\frac{1}{2}\mu\right]\le\left(\frac{n\mathrm{e}}{s}\right)^sn^{-\frac{Cs}{16}}=\left(\frac{\mathrm{e}}{s}n^{1-C/16}\right)^s.$$
+For large $n$ and $C$, summing over all $s=1,\dots,\lfloor n/2\rfloor$ gives
+\begin{align*}
+\Pr\left[\forall S:0<|S|\le\frac n 2, |E(S,V\setminus S)|\le\frac{1}{2}\mu\right]&\le\sum_{s=1}^{\lfloor n/2\rfloor}\left(\frac{\mathrm{e}}{s}n^{1-C/16}\right)^s\\
+&<\sum_{s=1}^{\infty}\left(\mathrm{e}n^{1-C/16}\right)^s\\
+&=\frac{\mathrm{e}n^{1-C/16}}{1-\mathrm{e}n^{1-C/16}}<\frac{1}{2n},
+\end{align*}
+i.e., $|E(S, V\setminus S)|\in O(s\log n)$ with probability at least $1-1/(2n)$.
+
+We have, via $(*)$, that $\vol(S)=\sum_{v\in S}\deg(v)\in\Theta(s\log n)$, and the conductance
+$$\Phi(S)=\frac{|E(S,V\setminus S)|}{\vol(S)}\in\frac{O(s\log n)}{\Theta(s\log n)}=O(1),$$
+i.e., $\Phi(G)\in\Omega(1)$ with probability at least $1-1/(2n)$.\hfill$(**)$
+
+From $(*)$ and $(**)$, the probability that both properties hold is at least $1-1/(2n)-1/(2n)=1-1/n$, as required.
+\end{enumerate}
+\end{document}

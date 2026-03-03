@@ -1,0 +1,158 @@
+\documentclass[12pt]{article}
+\usepackage[a4paper, margin=1in]{geometry}
+\usepackage{amsmath, amssymb, hyperref, enumitem, bbm}
+\DeclareMathOperator{\vol}{vol}
+\DeclareMathOperator{\LR}{LR}
+\DeclareMathOperator{\OPT}{OPT}
+\DeclareMathOperator{\dist}{\mathsf{dist}}
+\DeclareMathOperator{\E}{\mathbb{E}}
+\title{CS5275 Problem Set 1}
+\author{Li Jiaru (Student ID: A0332008U)}
+\date{\today}
+\begin{document}
+\maketitle
+\paragraph{Problem 1}
+\begin{enumerate}[label=\alph*., font=\bfseries]
+\item
+Pick a non-leaf vertex $v\in V$. Removing $v$ from $T$ splits it into a set of (at least two) connected components $\{T_1, T_2, \dots\}$. If $|T_i|>n/2$ for some $T_i$, we move $v$ to its neighbour in $T_i$ and repeat until every $T_i$ satisfies $|T_i|\le n/2$.
+
+Now we build a set $X$ with $n/4\le |X|\le n/2$ via the following procedure:
+\begin{itemize}
+\item If $n/4\le |T_i|\le n/2$ for some $T_i$, take $X:=T_i$.
+\item Otherwise, every $T_i$ satisfies $|T_i|<n/4$. Initialise $X\leftarrow\varnothing$. While $|X|<n/4$, we union $X$ with some $T_i$, i.e., $X\leftarrow X\cup T_i$. Then we are guaranteed to get some $X$ that satisfies the requirement (similar to the argument shown in Lecture 1, Page 18).
+\end{itemize}
+Note that $\partial_{\mathrm{out}}(X)$ consists of only $v$ itself as it splits $T$ into $X$ and $T\setminus X$. Thus we have $|\partial_{\mathrm{out}}(X)|=1$, so by definition \[h_{\mathrm{out}}(T)=\min_{0<|S|\le\frac{n}{2}}\frac{|\partial_{\mathrm{out}}(S)|}{|S|}\le\frac{|\partial_{\mathrm{out}}(X)|}{|X|}=\dfrac{1}{|X|}\le\dfrac{4}{n},\]
+and so $h_{\mathrm{out}}(T)\in O(1/n)$ as required.
+\item
+For any set $S\subset T$ with $0<|S|\le n/2$, there must be at least one edge between $S$ and $T\setminus S$, as $T$ is connected. Thus $|\partial_{\mathrm{out}}(S)|\ge 1$ and \[h_{\mathrm{out}}(T)=\min_{0<|S|\le\frac{n}{2}}\frac{|\partial_{\mathrm{out}}(S)|}{|S|}\ge\frac{1}{|S|}\ge\dfrac{2}{n},\]
+and so $h_{\mathrm{out}}(T)\in \Omega(1/n)$ as required.
+\end{enumerate}
+\paragraph{Problem 2}
+\begin{enumerate}[label=\alph*., font=\bfseries]
+\item
+In the given procedure, at step $i$ we denote the current set as $W_i$ and subset trimmed as $S_i$. We also denote the union of all the subsets trimmed as $S:=V\setminus W_{\mathrm{final}}$.
+
+Using the hint, to prove that $S$ yields a low-conductance cut in $G$, we first try to bound $|E_G(S, W_{\mathrm{final}})|$, the number of edges between $S$ and $W_{\mathrm{final}}$.
+
+At step $i$, we have $\vol_{G[W_i]}(S_i)\le\vol_{G[W_i]}(W_i)/2$ and $\Phi_{G[W_i]}(S_i)\le\phi/2$, so by definition
+\[|E_{G[W_i]}(S_i,W_i\setminus S_i)|\le\vol_{G[W_i]}(S_i)\dfrac{\phi}{2}.\]
+
+Note that by definition
+\[E_G(S, W_{\mathrm{final}})=\bigcup_i E_{G[W_i]}(S_i,W_i\setminus S_i)\cap E_G(S_i,W_{\mathrm{final}}),\]
+
+so that
+\[|E_G(S, W_{\mathrm{final}})|\le\sum_i|E_{G[W_i]}(S_i,W_i\setminus S_i)|\le\sum_i\dfrac{\phi}{2}\vol_{G[W_i]}(S_i).\]
+
+As $G[W_i]$ is a subgraph of $G$ and $S=\bigcup_{i}S_i$,
+\[\vol_{G[W_i]}(S_i)\le\vol_{G}(S_i),\quad\sum_i\vol_{G}(S_i)=\vol_G(S),\]
+
+so we get
+\[|E_G(S, W_{\mathrm{final}})|\le\dfrac{\phi}{2}\vol_G(S).\]
+
+Now we follow the hint to restrict this cut to $G'$. Denote $S':=S\cup V'$ and $W'=W_{\mathrm{final}}\cup V'$. Then we have
+\[|E_{G'}(S', W')|\le |E_G(S, W_{\mathrm{final}})|\le\dfrac{\phi}{2}\vol_G(S).\]
+
+As $\Phi(G')\ge\phi$, we have
+\[|E_{G'}(S', W')|\ge\phi\min(\vol_{G'}(S'),\vol_{G'}(W')).\]
+
+Combining these two inequalities gives
+\[\min(\vol_{G'}(S'),\vol_{G'}(W'))\le\dfrac{1}{2}\vol_G(S).\]
+
+Since $\vol_{G[W_i]}(S_i)\le\vol_{G[W_i]}(W_i)/2$ at every step $i$, we must have $\vol_{G'}(S')\le\vol_{G'}(W')$, so that $\min(\vol_{G'}(S'),\vol_{G'}(W'))=\vol_{G'}(S')$ and
+\[\vol_{G'}(S')\le\dfrac{1}{2}\vol_G(S).\]
+
+As $|E'|\ge(1-\varepsilon)|E|$ and $2|E|=\vol_G(V)$, we have
+\[\vol_{G}(S)-\vol_{G'}(S')\le 2|E|-2|E'|\le2|E|-2(1-\varepsilon)|E|=2\varepsilon|E|=\varepsilon\vol_G(V).\]
+
+Combining these two inequalities gives
+\[\vol_{G}(S)\le2\varepsilon\vol_G(V).\]
+
+Finally, as $S=V\setminus W_{\mathrm{final}}$, this means
+\[\vol_{G}(W_{\mathrm{final}})\ge(1-2\varepsilon)\vol_G(V)\in O(1-\varepsilon)\vol_G(V),\]
+
+as required.
+\end{enumerate}
+\paragraph{Problem 3}
+\begin{enumerate}[label=\alph*., font=\bfseries]
+\item
+Consider any vertex $v$. By definition it must have $r$ neighbours, each of which has $r-1$ new neighbours in turn. Thus the number of vertices at distance $i$ from $v$ is $r(r-1)^{i-1}$ for $i\ge1$ (via \texttt{BFS}). Let $B(v,t)$ be the ball of radius $t$ around $v$. Then for some sufficiently large $C$, the total size of the ball is
+\begin{align*}
+|B(v, t)| &= 1+\sum_{i=1}^{t}r(r-1)^{i-1}=1+r\sum_{i=0}^{t-1}(r-1)^i\\
+&=\begin{cases}
+\dfrac{r(r-1)^t-2}{r-2},&r\neq 2,\\
+1+2t,&r=2
+\end{cases}\\
+&\le C(r-1)^t.
+\end{align*}
+As $r\in O(1)$, take $k:=\left\lfloor\dfrac{\log_{r-1}n}{2}\right\rfloor\in\Theta(\log n)$, so that
+\[|B(v,k)|\le C(r-1)^k\le C(r-1)^{\frac{\log_{r-1}n}{2}}=C\sqrt n.\]
+Hence the number of pairs $(u,v)\in V\times V$ with $\dist_G(u,v)\le k$ is at most
+$$\sum_{v\in V}|B(v,k)|=n|B(v,k)|\le Cn^{3/2},$$
+and so there exist $n^2-Cn^{3/2}\in\Omega(n^2)$ pairs satisfying $\dist_G(u,v)\in\Omega(\log n)(>k)$, as required.
+\item
+By definition, we have
+$$\LR(G,H)=\dfrac{\sum_{u,v}w_G(u,v)d_{\OPT}(u,v)}{\sum_{u,v}w_H(u,v)d_{\OPT}(u,v)}\le\dfrac{\sum_{u,v}w_G(u,v)d(u,v)}{\sum_{u,v}w_H(u,v)d(u,v)},$$
+where $d_{\OPT}$ is an optimal metric of the corresponding LP and $d(u,v):=\dist_G(u,v)$ is the shortest-path metric on $G$.
+
+For the numerator, notice that $w_G(u,v)=1$ when $(u,v)\in E_G$ and $0$ otherwise. But when $(u,v)\in E_G$, by definition $d(u,v)=1$. Thus it equals to the number of edges, which is $rn/2\in\Theta(n)$ as $G$ is $r$-regular.
+
+For the denominator, notice that $w_H(u,v)=1$ for all $(u,v)\in E_H$ as $H$ is the clique $K_n$. By (3.a), there exist $\Omega(n^2)$ pairs satisfying $d(u,v)\in\Omega(\log n)$, so it is $\sum_{u,v}d(u,v)\in \Omega(n^2\log n)$.
+
+Hence we have
+\begin{equation}
+\LR(G,H)\in\dfrac{\Theta(n)}{\Omega(n^2\log n)}=O\left(\dfrac{1}{n\log n}\right).
+\end{equation}
+
+Consider the generalised conductance $\Phi(G,H)$ defined by
+\[\Phi(G,H)=\min_{S:E_H(S,V\setminus S)\ne\varnothing}\dfrac{|E_G(S,V\setminus S)|}{|E_H(S,V\setminus S)|}.\]
+
+Take the set $S$ that minimises $\Phi(G,H)$. WLOG we assume that $|S|\le n/2$, so that $|V\setminus S|\ge n/2$.
+
+As $G$ is $r$-regular, we have $\min(\vol_G(S), \vol_{G}(V\setminus S))=\vol_G(S)=r|S|$. Therefore $|E_G(S,V\setminus S)|=\dfrac{r|S|}{\Phi(G)}$.
+
+As $H$ is a clique, we have $|E_H(S,V\setminus S)|=|S|\cdot|V\setminus S|$.
+
+Putting them together, we have
+\begin{equation}
+\Phi(G, H)=\dfrac{|E_G(S,V\setminus S)|}{|E_H(S,V\setminus S)|}=\dfrac{r|S|}{|S|\cdot|V\setminus S|\Phi(G)}\le\dfrac{2r}{n\Phi(G)}\in O\left(\dfrac{1}{n}\right),
+\end{equation}
+
+as $r\in O(1)$ and $\Phi(G)\in\Omega(1)$ as given.
+
+Combining (1) and (2) gives
+$$\LR(G,H)\in O\left(\dfrac{\Phi(G, H)}{\log n}\right),$$
+as required.
+\end{enumerate}
+\paragraph{Problem 4}
+\begin{enumerate}[label=\alph*., font=\bfseries]
+\item
+We show that the path graph $G:=P_n$ has the desired property. Let $x$ and $y$ be the two endpoints. Thus $\dist_G(x,y)=n-1\in O(n)$.
+
+If $A=\varnothing$, then $d_A(x,y)=0$, so it does not affect the expectation. Thus for any nonempty $A$, by the triangle inequality and linearity of expectation, we have
+\[\E[d_A(x,y)]=\E[|f_A(x)-f_A(y)|]\le\E[f_A(x)]+\E[f_A(y)].\]
+
+Consider $f_A(x)=\dist_G(x,A)$. As $G$ is a path graph, the event $f_A(x)>k$ is equivalent to $v_i\notin A$ for all $i=1,2,\dots,k$. Since each vertex is independently sampled with probability $p=1/2$, we have $\Pr[v_i\in A]=1/2$ and so $$\Pr[f_A(x)>k]=\prod_{i=1}^k\Pr[v_i\notin A]=\left(1-\dfrac 1 2\right)^k=\dfrac{1}{2^k}.$$
+By the tail-sum formula,
+$$\E[f_A(x)]=\sum_{k=0}^n\Pr[f_A(x)>k]=\sum_{k=0}^n\dfrac{1}{2^k}<\sum_{k=0}^\infty\dfrac{1}{2^k}=2,$$
+and by symmetry we have $\E[f_A(y)]<2$ as well. Thus $\E[d_A(x,y)]<4$.
+
+Therefore $$\E[d_A(x,y)]\in O(1)=O(n^{-1})O(n)\subset O(n^{-0.01})\dist_G(x,y)$$ as required.
+\item
+We show that the star graph $G:=S_n$ has the desired property. Let $x$ and $y$ be two distinct leaves.
+
+For any nonempty $A$, if $x,y\notin A$, then $f_A(x)=f_A(y)$ and so $d_A(x,y)=|f_A(x)-f_A(y)|=0$. Thus $d_A(x,y)\neq0$ only when $x\in A$ or $y\in A$. Note that $\Pr[x\in A]=\Pr[y\in A]=p=1/n$. By the inclusion-exclusion principle, we have
+\begin{align*}
+\Pr[x\in A\cup y\in A]&=\Pr[x\in A] + \Pr[y\in A] - \Pr[x\in A\cap y\in A]\\
+&\le \Pr[x\in A] + \Pr[y\in A]\\
+&=\dfrac 1 n+\dfrac 1 n = \dfrac 2 n.
+\end{align*}
+
+Note that $d_A(x,y)\le\dist_G(x,y)$ for all $A$. Hence the expectation
+\begin{align*}
+\E[d_A(x,y)]&\le\Pr[d_A(x,y)\ne 0]\max(d_A(x,y))\\
+&\le\dfrac 2 n\dist_G(x,y)\\
+&\in O(n^{-0.01})\dist_G(x,y),
+\end{align*}
+as required.
+\end{enumerate}
+\end{document}

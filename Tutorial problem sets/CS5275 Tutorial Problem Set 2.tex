@@ -1,0 +1,63 @@
+\documentclass[12pt]{article}
+\usepackage[a4paper, margin=1in]{geometry}
+\usepackage{amsmath, amssymb, hyperref, enumitem, bbm}
+\newcommand\mr{\mathrm}
+\newcommand\mb{\mathbf}
+\DeclareMathOperator{\dTV}{\mathnormal{d}_{\mathrm{TV}}}
+\DeclareMathOperator{\E}{\mathbb{E}}
+\title{CS5275 Tutorial Problem Set 2}
+\author{Li Jiaru}
+\date{\today}
+\begin{document}
+\maketitle
+\paragraph{Problem 1}
+For any two probability distributions $\mu$ and $\nu$ on a finite set $\Omega$, define $\Delta(x):=\mu(x)-\nu(x)$ for $x\in\Omega$. Partition $\Omega$ into $\Omega^+:=\{x\in\Omega:\Delta(x)\ge0\}$ and $\Omega^-:=\{x\in\Omega:\Delta(x)<0\}$.
+
+By definition we have $$\sum_{x\in\Omega}\Delta(x)=\sum_{x\in\Omega}\mu(x)-\sum_{x\in\Omega}\nu(x)=1-1=0,$$
+so that $$\sum_{x\in\Omega}\Delta(x)=\sum_{x\in\Omega^+}\Delta(x)+\sum_{x\in\Omega^-}\Delta(x)=0\implies\sum_{x\in\Omega^+}\Delta(x)=-\sum_{x\in\Omega^-}\Delta(x).$$
+Thus \begin{align*}
+\dTV(\mu,\nu)&=\frac1 2\sum_{x\in\Omega}|\Delta(x)|\\
+&=\frac1 2\left(\sum_{x\in\Omega^+}\Delta(x)+\sum_{x\in\Omega^-}\left(-\Delta(x)\right)\right)\\
+&=\sum_{x\in\Omega^+}\Delta(x).
+\end{align*}
+Now for any $A\subseteq\Omega$, we have
+\begin{align*}
+\mu(A)-\nu(A)&=\sum_{x\in A}\Delta(x)\\
+&=\underbrace{\sum_{x\in A\cap\Omega^+}\Delta(x)}_{\le\sum_{x\in\Omega^+}\Delta(x)}+\underbrace{\sum_{x\in A\cap\Omega^-}\Delta(x)}_{\le0}\\
+&\le\sum_{x\in\Omega^+}\Delta(x),
+\end{align*}
+and note that equality is attained when $A=\Omega^+$. Thus $\displaystyle\dTV(\mu,\nu)=\max_{A\subseteq\Omega}\left(\mu(A)-\nu(A)\right)$ as required.
+\paragraph{Problem 2}
+\paragraph{Problem 3}
+Consider the normalized Laplacian matrix $\mathbf{N}=\mathbf{I}-\frac 1 d\mathbf{A}$. Recall from Lecture 4 that\begin{itemize}
+\item its smallest eigenvalue is $0$ with eigenvector $\mathbf{1}$; \item its second smallest eigenvalue is $0$ if and only if the graph has at least $2$ connected components; \item its largest eigenvalue is at most $2$ and equals $2$ if and only if the graph has a bipartite connected component.
+\end{itemize}
+
+As $G$ is connected and non-bipartite, for the transition matrix $\mathbf{W}=\frac 1 d\mathbf{A}=\mathbf{I}-\mathbf{N}$, the largest eigenvalue is $1$, the second largest eigenvalue is smaller than $1$ and the smallest eigenvalue is larger than $-1$. Thus $\mathbf{W}$ has an orthonormal eigenbasis $\{\mathbf{w}_1=\frac{1}{\sqrt n}\mathbf{1},\mathbf{w}_2,\dots,\mathbf{w}_n\}$ with eigenvalues $1=\lambda_1>\lambda_2\ge\dots\ge\lambda_n>-1$, and $\mathbf{W}^\top=\mathbf{W}$.
+
+For any initial distribution $\mathbf{x}$, we can decompose it into the eigenbasis as $\sum_{i=1}^nc_i\mathbf{w}_i$. Hence we have \begin{align*}
+\left(\mathbf{W}^\top\right)^t\mathbf{x}=\mathbf{W}^t\mathbf{x}&=\mathbf{W}^t\left(c_1\mathbf{w}_1+\sum_{i=2}^nc_i\mathbf{w}_i\right)\\
+&=c_1\left(\frac{1}{\sqrt n}\mathbf{1}\right)+\sum_{i=2}^nc_i\lambda_i^t\mathbf{w}_i.
+\end{align*}
+
+As $|\lambda_i|<1$ for each $i=2,\dots,n$, the latter term goes to $0$ as $t\to\infty$. Also notice that $c_1$ is the dot product between $\mathbf{x}$ and $\mathbf{w}_1$. Therefore, $$\lim_{t\to\infty}\left(\mathbf{W}^\top\right)^t\mathbf{x}=\left(\sum_{i=1}^n x_i\frac{1}{\sqrt n}\right)\left(\frac{1}{\sqrt n}\mathbf{1}\right)+0=\frac{1}{n}\mathbf{1}=\mathbbm{\pi}.$$
+\paragraph{Problem 4}
+Construct $S\subseteq V$ by independently choosing to include each vertex with probability $p=1/(d+1)$. Define $T$ as the set of vertices that are neither in $S$ nor have any neighbors in $S$: $T = \{v \in V \setminus S \mid N(v) \cap S = \varnothing\}$. We show that $|S||T|d\ge0.01n^2$.
+
+Define indicator random variables for each vertex $i, j \in V$: $I_i = 1$ if $i \in S$ and $0$ otherwise, $J_j = 1$ if $j \in T$ and $0$ otherwise. Then $|S| = \sum_{i=1}^n I_i$ and $|T| = \sum_{j=1}^n J_j$.
+
+Consider the three possible cases for $I_iJ_j$:
+\begin{itemize}
+    \item $i = j$: By definition, $I_i J_j = 0$ as a vertex cannot be both in $S$ and in $T$.
+    \item $i \in N(j)$: If $j \in T$, none of its neighbors can be in $S$. Thus $I_i = 0$, so $I_i J_j = 0$.
+    \item $i \neq j$ and $i \notin N(j)$: The event that $i \in S$ depends only on vertex $i$. The event that $j \in T$ depends only on vertex $j$ and its neighborhood $N(j)$. Since $i \notin N(j) \cup \{j\}$, $I_i$ and $J_j$ are independent.
+\end{itemize}
+Since $G$ is $d$-regular, the set $\{j\} \cup N(j)$ contains exactly $d+1$ vertices. The probability that none of these $d+1$ vertices are in $S$ is $(1-p)^{d+1}$. Therefore$$\E[I_i J_j]=\E[I_i]\E[J_j] = p(1-p)^{d+1}.$$
+For each of the $n$ choices of $j$, we exclude $j$ itself and the neighbors of $j$. This leaves exactly $n - d - 1$ choices for $i$. Therefore $$\E[|S||T|]=\E\left[\sum_{i=1}^n\sum_{j=1}^nI_jJ_j\right]=n(n - d - 1)p(1-p)^{d+1}.$$
+By substituting $p = \frac{1}{d+1}$, we have
+$$\E[|S||T|] = n(n - d - 1) \left(\frac{1}{d+1}\right) \left(1 - \frac{1}{d+1}\right)^{d+1} = n(n - d - 1) \left(\frac{1}{d+1}\right) \left(\frac{d}{d+1}\right)^{d+1},$$
+So that $$\E[|S||T|d] = n(n - d - 1) \left(\frac{d}{d+1}\right)^{d+2}.$$
+As the function $\left(\frac{d}{d+1}\right)^{d+2}$ strictly increases with $d$, for $d\ge 1$ its minimum is $1/8$, attained at $d=1$.
+Therefore, for any $d \ge 1$, we have $$\E[|S||T|d] \ge \frac 1 8 n(n - d - 1) = \frac 1 8 n^2 \left(1 - \frac{d+1}{n}\right).$$
+Finally, we take $n_0=n_0(d) = 25(d+1)/23$, so that $$\E[|S||T|d] \ge \frac 1 8 n^2 \left(1 - \frac{23}{25}\right)=0.01n^2,$$ which implies that there exists at least one outcome of the random choice of $S$ and $T$ so that $|S||T|d\ge0.01n^2$ as required.
+\end{document}

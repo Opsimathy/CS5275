@@ -1,0 +1,125 @@
+\documentclass[12pt]{article}
+\usepackage[a4paper, margin=1in]{geometry}
+\usepackage{amsmath, amssymb, hyperref, enumitem, bm}
+\DeclareMathOperator{\TV}{TV}
+\DeclareMathOperator{\vol}{vol}
+\DeclareMathOperator{\mix}{mix}
+\DeclareMathOperator{\sm}{\setminus}
+\DeclareMathOperator{\I}{\mathbf{I}}
+\DeclareMathOperator{\A}{\mathbf{A}}
+\DeclareMathOperator{\x}{\mathbf{x}}
+\DeclareMathOperator{\y}{\mathbf{y}}
+\DeclareMathOperator{\e}{\mathbf{e}}
+\DeclareMathOperator{\Wt}{\mathbf{\tilde{W}}^{\top\mathnormal{t}}}
+\title{CS5275 Problem Set 2}
+\author{Li Jiaru (Student ID: A0332008U)}
+\date{\today}
+\begin{document}
+\maketitle
+\paragraph{Problem 1}
+\begin{enumerate}[label=\alph*., font=\bfseries]
+\item Recall the definition of $\Phi_C(S)$ given as
+$$\Phi_C(S)=\frac{|E(S,V(C)\sm S)|}{\min(\vol(S),\vol(V(C)\sm S))},$$
+where $|E(S,V(C)\sm S)|$ is precisely the number of edges removed at each step.
+
+Denote the connected component and the subset we pick at step $i$ as $C_i$ and $S_i$, respectively. WLOG assume that $\vol(S_i)\le\vol(V(C_i)\sm S_i)$. Denote $E_i$ to be the set of edges removed at step $i$. Hence by $\Phi_{C_i}(S_i)\le\phi$, we have $|E_i|\le\phi\vol(S_i)$.
+
+For every $v\in V$, the number of times it can possibly appear in some $S_i$ is at most $\log_2(\vol(V))$, since at each step we split some connected component into two which could at most halve the volume. Note that for $G=(V,E)$, we have $\vol(V)\le2|E|$ and $|E|\le\binom{n}{2}$. Thus we have
+$$\log_2(\vol(V))\le\log_2(2|E|)\le\log_2\left(2\cdot\binom{n}{2}\right)=\log_2(n(n-1))\in O(\log n).$$
+Therefore the total number of edges removed during this process is at most
+$$\sum_i|E_i|\le\phi\sum_i\vol(S_i)\in O(\phi\cdot|E|\cdot\log n),$$as required.
+\end{enumerate}
+\paragraph{Problem 2}
+\begin{enumerate}[label=\alph*., font=\bfseries]
+\item We construct $G=(V, E)$ as follows:
+\begin{itemize}
+    \item Let $A$ and $B$ be two $\lfloor n/3\rfloor$-cliques.
+    \item Let $P$ be a path graph with $n-2\lfloor n/3\rfloor$ vertices, $v_0, v_1,\dots,v_m$ with $m\in\Theta(n)$.
+    \item Connect $v_0$ to a vertex in $A$ and $v_m$ to a vertex in $B$.
+\end{itemize}
+We also define a function $f:V\to\mathbb{R}$ as follows:
+\[
+f(v)=
+\begin{cases}
+1, &v\in A,\\
+-1, &v\in B,\\
+1-2i/m, &v_i\in P,\quad i=0,1,\dots,m.
+\end{cases}
+\]
+
+We have $\deg(v)=\lfloor n/3\rfloor-1\in\Theta(n)$ for all $v\in A$ and $v\in B$ and $\deg(v)=2$ for all $v\in P$. Therefore
+\begin{align*}
+    \sum_{v\in V}\deg(v)f(v)&=\sum_{v\in A}\deg(v)f(v)+\sum_{v\in B}\deg(v)f(v)+\sum_{v\in P}\deg(v)f(v)\\
+    &=\left(\sum_{v\in A}\deg(v)\cdot 1+\sum_{v\in B}\deg(v)\cdot(-1)\right)+\sum_{i=0}^m 2\left(1-\frac{2i}{m}\right)\\
+    &= 0+0=0,
+\end{align*}
+so via the variational characterization given for $\lambda_2$, we have
+$$\lambda_2(\mathbf{N})\le\frac{\sum_{\{u,v\}\in E}\left(f(u)-f(v)\right)^2}{\sum_{v\in V}\deg(v)f(v)^2}.$$
+The denominator can be bounded as
+\begin{align*}
+    \sum_{v\in V}\deg(v)f(v)^2&=\sum_{v\in A}\deg(v)f(v)^2+\sum_{v\in B}\deg(v)f(v)^2+\sum_{v\in P}\deg(v)f(v)^2\\
+    &=\left(\sum_{v\in A}\deg(v)\cdot 1^2+\sum_{v\in B}\deg(v)\cdot(-1)^2\right)+\sum_{i=0}^m 2\left(1-\frac{2i}{m}\right)^2\\
+    &=2\left\lfloor\frac{n}{3}\right\rfloor\left(\left\lfloor\frac{n}{3}\right\rfloor-1\right)+\frac{2(m+1)(m+2)}{3m}\in\Theta\left(n^2\right).
+\end{align*}
+For the numerator, notice that for any edge $\{u,v\}$ in $A$ and $B$, the quantity $\left(f(u)-f(v)\right)^2=0$, as $f$ is constant. Thus we only need to consider the edges in $P$, $\{v_0,v_1\},\{v_1,v_2\},\dots,\{v_{m-1},v_m\}$, the edge $\{v_A,v_0\}$ connecting $P$ to $A$ and the edge $\{v_m,v_B\}$ connecting $P$ to $B$.
+
+Indeed, we have
+\begin{align*}
+    \sum_{\{u,v\}\in E}\left(f(u)-f(v)\right)^2&=\underbrace{\sum_{i=0}^{m-1}\left(\left(1-\frac{2i}{m}\right)-\left(1-\frac{2(i+1)}{m}\right)\right)^2}_{\text{all edges in }P}\\
+    &+\underbrace{\left(1-\left(1-\frac{2\cdot 0}{m}\right)\right)^2}_{\text{the edge }\{v_A,v_0\}}+\underbrace{\left(\left(1-\frac{2\cdot m}{m}\right)-(-1)\right)^2}_{\text{the edge }\{v_m,v_B\}}\\
+    &=\frac{4}{m}+0+0\in\Theta\left(\frac{1}{n}\right).
+\end{align*}
+
+Putting together, we have
+$$\lambda_2(\mathbf{N})\le\frac{\Theta\left(\dfrac{1}{n}\right)}{\Theta\left(n^2\right)}\in O\left(\frac{1}{n^3}\right),$$as required.
+\item Denote the diameter of $G$ as $D$. We have $D\in O(n)$ and from Problem 1 we have shown that $\vol(V)\in O\left(n^2\right)$.
+
+Recall the variational characterization given for $\lambda_2$ as
+$$\lambda_2(\mathbf{N})=\min_{f:V\to\mathbb R,f\not\equiv 0}\frac{\sum_{\{u,v\}\in E}\left(f(u)-f(v)\right)^2}{\sum_{v\in V}\deg(v)f(v)^2}\quad \text{subject to}\quad\sum_{v\in V}\deg(v)f(v)=0.$$
+For convenience, notice that we could scale any feasible $f$ by a constant and that does not change the variational characterization. Therefore we may replace $f$ by the following function $g$:
+$$g(v):=\dfrac{f(v)}{\displaystyle\max_{v\in V}f(v)-\min_{v\in V}f(v)}.$$
+Denote $M:=\displaystyle\max_{v\in V}g(v)$ and $m:=\displaystyle\min_{v\in V}g(v)$. By construction we have $M-m=1$. Take the two vertices $u$ and $v$ corresponding to $m$ and $M$ respectively (so that $g(u)=m$ and $g(v)=M$). By definition, the shortest path connecting them has length $D'\le D\in O(n)$. Denote this path as $w_1(=u),w_2,\dots,w_{D'-1},w_{D'}(=v)$.
+
+To bound the numerator, we have, via telescoping sum, that
+$$\sum_{i=1}^{D'-1}\left(g(w_{i+1})-g(w_i)\right)=g(v)-g(u)=M-m=1,$$
+so by Cauchy-Schwarz inequality, we have
+$$\sum_{i=1}^{D'-1}\left(g(w_{i+1})-g(w_i)\right)^2\ge\frac{\left(\sum_{i=1}^{D'-1}\left(g(w_{i+1})-g(w_i)\right)\right)^2}{D'-1}=\frac{1}{D'-1}\in\Omega\left(\frac 1 n\right).$$
+Note that the sum of squared differences over all edges is greater than or equal to the sum of squared differences along this path, i.e.,
+$$\sum_{\{u,v\}\in E}(g(u)-g(v))^2\ge\sum_{i=1}^{D'-1}\left(g(w_{i+1})-g(w_i)\right)^2\in\Omega\left(\frac 1 n\right).$$
+For the numerator, notice that by $\sum_{v\in V}\deg(v)g(v)=0$ and $g\not\equiv 0$, we have $m<0<M$. Hence $M=1+m<1$ and $m=M-1>-1$. As $g(v)\in[m,M]$ for all $v\in V$, we have $0<g(v)^2<1$.
+
+Therefore we have
+$$\sum_{v\in V}\deg(v)g(v)^2<\sum_{v\in V}\deg(v)=\vol(V)\in O\left(n^2\right).$$
+
+Finally, we conclude that
+$$\lambda_2(\mathbf{N})=\min_{g:V\to\mathbb R,g\not\equiv 0}\frac{\sum_{\{u,v\}\in E}\left(g(u)-g(v)\right)^2}{\sum_{v\in V}\deg(v)g(v)^2}\in\frac{\Omega\left(\dfrac 1 n\right)}{O\left(n^2\right)}=\Omega\left(\frac{1}{n^3}\right),$$as required.
+\end{enumerate}
+\paragraph{Problem 3}
+\begin{enumerate}[label=\alph*., font=\bfseries]
+\item Recall that the mixing time is defined by
+$$T_{\mix}(G,\varepsilon):=\max_{\mathbf{x}}\min\left\{t:d_{\TV}\!\left(\Wt\mathbf{x},\bm{\pi}\right)\le\varepsilon\right\},$$
+where $d_{\TV}(\x,\y)=\dfrac{1}{2}\lVert\x-\y\rVert_1$.
+We just need to show that we can replace $\x\in\mathbb{R}^V$ with $\mathbf{e}_v$ for $v\in V$.
+
+Indeed, as the set of all $\mathbf{e}_v$'s form an orthonormal basis for $\mathbb{R}^V$, we can write any $\x$ as $\x=\sum_{v\in V}x_v\e_v$ where $\sum_{v\in V}x_v=1$.
+
+By linearity we have \[\Wt\x=\Wt\sum_{v\in V}x_v\e_v=\sum_{v\in V}x_v\Wt\e_v.\]Therefore we have \begin{align*}
+d_{\TV}\!\left(\Wt\mathbf{x},\bm{\pi}\right)&=d_{\TV}\left(\sum_{v\in V}x_v\Wt\e_v,\sum_{v\in V}x_v\bm{\pi}\right)\tag*{(by \(\displaystyle\sum_{v\in V}x_v=1)\)}\\
+&=\dfrac{1}{2}\left\lVert\sum_{v\in V}x_v\Wt\e_v-\sum_{v\in V}x_v\bm{\pi}\right\rVert_1\tag*{(by definition)}\\
+&\le\dfrac{1}{2}\sum_{v\in V}x_v\left\lVert\Wt\e_v-\bm{\pi}\right\rVert_1\tag*{(triangle inequality)}\\
+&=\sum_{v\in V}x_v d_{\TV}\left(\Wt\e_v,\bm{\pi}\right)\tag*{(by definition)}\\
+&\le\left(\sum_{v\in V}x_v\right)\left(\max_{v\in V}d_{\TV}\left(\Wt\e_v,\bm{\pi}\right)\right)\tag*{(splitting terms)}\\
+&=\max_{v\in V}d_{\TV}\left(\Wt\e_v,\bm{\pi}\right).\tag*{(by \(\displaystyle\sum_{v\in V}x_v=1)\)}
+\end{align*}
+Therefore taking the maximum over all $\x\in\mathbb{R}^V$ is equivalent to taking the maximum over all $v\in V$ after replacing $\x$ with $\e_v$. Hence the definition remains unchanged.
+\end{enumerate}
+\paragraph{Problem 4}
+\begin{enumerate}[label=\alph*., font=\bfseries]
+\item As $\A$ is symmetric, we could use the variational characterization for its largest eigenvalue as $$\lambda_{\max}(\A)=\max_{\x\in\mathbb{R}^n\setminus\{\bm{0}\}}R_{\A}(\x)=\max_{\x\in\mathbb{R}^n\setminus\{\bm{0}\}}\frac{\mathbf{x^{\top}Ax}}{\mathbf{x^{\top}x}}.$$
+
+Notice that the numerator equals $\displaystyle\sum_{u\in V}\sum_{v\in V}\x_u\A_{uv}\x_v$. Take $\x$ to be the indicator vector of $V$, so that $\x_v=1$ when $v\in V$ and $0$ otherwise. As $\A_{uv}=1$ when $\{u,v\}\in E$ and $0$ otherwise, this is equivalent to $\displaystyle\sum_{\{u,v\}\in E}\x_u\x_v=2|E|$, as each edge is counted twice. On the other hand, the denominator equals $\displaystyle\sum_{v\in V}\x_v^2=|V|$.
+
+For an induced subgraph $G[W]$, we take the respective indicator vector $\x_W$. By taking the maximum over all induced subgraphs, we have $$\lambda_{\max}(\A)=2\cdot\max_{W\subseteq V}\frac{|E(G[W])|}{|W|}.$$
+Now for any (not necessarily induced) non-null subgraph $H$, consider the corresponding induced subgraph $G[V(H)]$. By definition we have $E(H)\subseteq E(G[V(H)])$, so $|E(G[V(H)])|\ge|E(H)|$. Therefore $$\lambda_{\max}(\A)=2\cdot\max_{W\subseteq V}\frac{|E(G[W])|}{|W|}\ge2\cdot\max_{H\subseteq G}\frac{|E(H)|}{|V(H)|},$$as required.
+\end{enumerate}
+\end{document}
