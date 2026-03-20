@@ -1,0 +1,172 @@
+\documentclass[12pt]{article}
+\usepackage[a4paper, margin=1in]{geometry}
+\usepackage{amsmath, amssymb, hyperref, enumitem, bbm, algorithm, algpseudocode, amsthm}
+\newtheorem{lemma}{Lemma}
+\algnewcommand{\Oracle}{\mathtt{Oracle}}
+\DeclareMathOperator{\vol}{vol}
+\DeclareMathOperator{\out}{out}
+\newcommand{\A}{\mathbf{A}}
+\newcommand{\x}{\mathbf{x}}
+\newcommand{\m}{\mathbf{m}}
+\newcommand{\E}{\mathbb{E}}
+\title{CS5275 Problem Set 3}
+\author{Li Jiaru (Student ID: A0332008U)}
+\date{\today}
+\begin{document}
+\maketitle
+\paragraph{Problem 1}
+\begin{enumerate}[label=\alph*., font=\bfseries]
+\item WLOG assume that $\vol(S)\le\vol(V\setminus S)$, so that $$\Phi(S)=\frac{|E(S,V\setminus S)|}{\vol(S)}=\phi.$$
+
+Consider a probability distribution $\x$ supported on $S$, defined by
+$$\x(v)=\begin{cases}\dfrac{\deg(v)}{\vol(S)},\quad v\in S,\\0,\quad v\notin S.\end{cases}$$
+Notice that $\x(A)=\dfrac{\vol(A)}{\vol(S)}$ for $A\subseteq S$.
+
+For a standard (non-lazy) random walk on $G$, $(\x_0,\x_1,\dots)$, define a `killed mass' process $\m_i(v)$ for $i\ge 0$ and $v\in S$, as suggested in the hint, by
+$$\m_i(v):=\Pr\left[\x_i=v\land \x_0,\x_1,\dots,\x_{i-1}\in S\right],$$
+i.e., $\m_i$ is the (unnormalized) distribution of the walk at time $i$ conditioned on having stayed inside $S$ up to time $i$, or the amount of   `surviving' probability mass at time $i$ in the `killed' walk. Then we have the following lemma.
+\begin{lemma}\label{p1}
+For all $i\ge0$ and $v\in S$, we have $\m_i(v)\le\dfrac{\deg(v)}{\vol(S)}.$
+\begin{proof}
+We prove by induction. The base case $i=0$ is trivial as $\m_0(v)=\x(v)$.
+
+For the inductive step, assume that $\m_i(v)\le\dfrac{\deg(v)}{\vol(S)}$. By definition
+\begin{align*}
+\m_{i+1}(v)&=\sum_{u\in S}\m_i(u)\Pr[u\to v]\\&=\sum_{u\in S,\{u,v\}\in E}\m_i(u)\frac{1}{\deg(u)}\\&\le\sum_{u\in S,\{u,v\}\in E}\dfrac{\deg(u)}{\vol(S)}\frac{1}{\deg(u)}\\&=\dfrac{1}{\vol(S)}\sum_{u\in S,\{u,v\}\in E}1\le\dfrac{\deg(v)}{\vol(S)}.
+\end{align*}
+Thus the claim holds.
+\end{proof}
+\end{lemma}
+Now we prove that each step `leaks' at most $\phi$ mass from the killed mass process. For each $v\in S$, consider the number of edges from $v$ that go outside $S$, denoted as $\out(v):=|\{u\notin S:\{u,v\}\in E\}|$. Then $\sum_{v\in S}\out(v)=|E(S,V\setminus S)|$, and the probability that the random walk exits $S$ at time $i+1$ is $\displaystyle p_{i+1}=\sum_{v\in S}\m_i(v)\frac{\out(v)}{\deg(v)}$. Via Lemma \ref{p1}, we have
+$$p_{i+1}\le\sum_{v\in S}\dfrac{\deg(v)}{\vol(S)}\frac{\out(v)}{\deg(v)}=\frac{\sum_{v\in S}\out(v)}{\vol(S)}=\frac{|E(S,V\setminus S)|}{\vol(S)}=\phi.$$
+Therefore, starting from $\x$, the probability of exiting by time $t$ is at most
+$$\Pr[\text{exit by time } t]=\sum_{i=0}^{t-1}p_{i+1}\le\sum_{i=0}^{t-1}\phi=t\phi\le 0.1.$$
+Recall that we are asked to show that
+$$\Pr[\text{a $t$-step random walk started at $v$ never leaves $S$}]\ge\dfrac{1}{2}.$$
+Denote the probability above starting from some $v\in S$ as $p(v)$, and $q(v):=1-p(v)$. Then we have $\E_{v\sim\x}[q(v)]\le 0.1$.
+
+Define the set of `bad' vertices $Q:=\{v\in S:q(v)>1/2\}$. Since every $v\in Q$ contributes more than $1/2$ to the expectation,
+$$\E_{v\sim\x}[q(v)]=\sum_{v\in S}\x(v)q(v)\ge\sum_{v\in Q}\x(v)q(v)>\frac 1 2\sum_{v\in Q}\x(v)=\frac{1}{2}\x(Q)\implies\x(Q)<0.2.$$
+But then $$\x(Q)=\frac{\vol(Q)}{\vol(S)}<0.2\implies\vol(Q)<0.2\vol(S),$$
+so taking $X=S\setminus Q=\{v\in S:q(v)\le 1/2\}$, we have $\vol(X)=\vol(S)-\vol(Q)\ge0.8\vol(S)$, and for every $v\in X$,
+$$\Pr[\text{a $t$-step random walk started at $v$ never leaves $S$}]=1-q(v)\ge\frac 1 2,$$as required.
+\end{enumerate}
+\newpage
+\paragraph{Problem 2}
+\begin{enumerate}[label=\alph*., font=\bfseries]
+\item Denote the adjacency matrix of $G$ as $\A$, with eigenvalues $d=\lambda_1\ge\lambda_2\ge\dots\ge\lambda_n\ge-d$. Recall that Ramanujan graphs satisfy $$\sigma_2=\max\{|\lambda_2|,|\lambda_3|,\dots,|\lambda_n|\}\le2\sqrt{d-1}.$$
+For any cut $(S,V\setminus S)$, denote $s:=|S|$ and $\x$ to be the indicator vector for $S$. Decompose $\mathbf{x}$ into two orthogonal components: one parallel to the all-ones vector $\mathbf{1}$, and one perpendicular to it. Thus $$\mathbf{x} = \frac{s}{n}\mathbf{1} + \mathbf{v}.$$
+By definition, $\mathbf{v} \perp \mathbf{1}$ and $$\|\mathbf{v}\|^2 = \|\mathbf{x}\|^2 - \left\| \frac{s}{n}\mathbf{1} \right\|^2 = s - n\left(\frac{s}{n}\right)^2 = s - \frac{s^2}{n} = \frac{s(n-s)}{n}.$$
+Note that $\mathbf{x}^\top \A \mathbf{x}$ is just $e(S, S)$. Substituting gives
+\begin{align*}
+\mathbf{x}^\top \A \mathbf{x} &= \left( \frac{s}{n}\mathbf{1} + \mathbf{v} \right)^\top \A \left( \frac{s}{n}\mathbf{1} + \mathbf{v} \right)\\
+&= \left(\frac{s}{n}\right)^2 \mathbf{1}^\top \A \mathbf{1} + \mathbf{v}^\top \A \mathbf{v}\\
+&= \frac{s^2}{n^2}(dn) + \mathbf{v}^\top \A \mathbf{v} = \frac{ds^2}{n} + \mathbf{v}^\top \A \mathbf{v}.
+\end{align*}
+But as $\mathbf{v} \perp \mathbf{1}$, the term $\mathbf{v}^\top \A \mathbf{v}$ is lower bounded in terms of $\sigma_2$ as
+$$\mathbf{v}^\top \A \mathbf{v} \ge -\sigma_2 \|\mathbf{v}\|^2 = -\sigma_2 \frac{s(n-s)}{n}.$$
+Thus we have
+$$e(S,S) \ge \frac{ds^2 - \sigma_2 s(n-s)}{n}.$$
+Since $G$ is $d$-regular, we have $\vol(S)=ds$. But $\vol(S)$ is just the sum of the degrees of all the vertices in $S$, which include (i) all edges crossing the cut $(S, V\setminus S)$ and (ii) all internal edges in $S$. Thus
+$$ds = |E(S, V \setminus S)| + e(S, S).$$
+Rearranging gives
+\begin{align*}
+|E(S, V \setminus S)| &= ds - e(S, S)\\
+&\le ds - \left( \frac{ds^2 - \sigma_2 s(n-s)}{n} \right)\\
+&= \left(d + \sigma_2\right) \frac{s(n-s)}{n}.
+\end{align*}
+Notice that $s(n-s)/n$ has maximum value $n/4$ attained at $s=n/2$. Together with $\sigma_2\le2\sqrt{d-1}$, we conclude that
+\begin{align*}
+|E(S, V \setminus S)| &\le \left(d + 2\sqrt{d-1}\right) \frac{n}{4}\\
+&=\frac{nd}{4}+\frac{1}{2}n\sqrt{d-1}\\
+&\in \frac{nd}{4}+O\left(n\sqrt d\right),
+\end{align*}
+as required.
+\item \textit{Actually, this part holds for any $d$-regular graph, not just Ramanujan.}
+
+Recall that a $d$-regular graph $G=(V,E)$ has $|E|=nd/2$.
+
+Construct a cut $(S,V\setminus S)$ as follows: for every $v\in V$, put $v$ into $S$ with probability $1/2$ and into $V\setminus S$ with probability $1/2$.
+
+For every $e=\{u,v\}\in E$, consider the event `$u\in S, v\in V\setminus S$ or $v\in S, u\in V\setminus S$'. Denote its indicator random variable as $\mathbbm{1}_e$. Then $\mathbb{E}\left[\mathbbm{1}_e\right]=1/2$ by definition.
+
+Therefore $$\mathbb{E}\left[|E(S, V\setminus S)|\right]=\sum_{e\in E}\mathbb{E}\left[\mathbbm{1}_e\right]=\frac{1}{2}|E|=\frac{nd}{4},$$
+so there must exist some $S$ such that $$|E(S, V\setminus S)|\ge\frac{nd}{4}\in\frac{nd}{4}-O\left(n\sqrt d\right),$$
+as required.
+\end{enumerate}
+\newpage
+\paragraph{Problem 3}
+\begin{enumerate}[label=\alph*., font=\bfseries]
+\item Recall that the vertex connectivity $\kappa(G)$ is the minimum size of a vertex cut. Take $C\subseteq V$ to be a minimum vertex cut, so that $\kappa(G)=|C|$ and $G-C$ is disconnected. Let $L$ be its smallest connected component, so that $0<|L|\le |V\setminus C|/2\le |V|/2$ and there are no edges between $L$ and $(V\setminus C)\setminus L$.
+
+Given that $$\Phi(G)=\min_{S\subseteq V:0<|S|\le |V|/2}\frac{|E(S,V\setminus S)|}{\vol(S)}\ge\phi,$$
+substituting $S=L$ gives $|E(L,V\setminus L)|\ge\phi\vol(L)$.
+
+By definition, $|E(L,V\setminus L)|=|E(L, C)|$. We also have $|E(L, C)|\le |L||C|$ as $G$ is simple and $\vol(L)=d|L|$ as $G$ is $d$-regular.
+
+Therefore, $|L||C|\ge \phi d|L|$, so that $\kappa(G)=|C|\ge\phi d\in\Omega(\phi d)$ as required.
+\end{enumerate}
+\newpage
+\paragraph{Problem 4}
+\begin{enumerate}[label=\alph*., font=\bfseries]
+\item Consider the following algorithm.
+\begin{algorithm}[h]
+\caption{Finding a minimum vertex cut with a promise}
+\begin{algorithmic}
+\Require A graph $G=(V,E)$.
+
+Some $S\subseteq V$ such that $|S|=k+1$ where $k=\lfloor \sqrt{n}\rfloor$ and $n = |V|$.
+
+A graph $G'=(V\cup\{r\},\, E \cup \{\{s,r\}: s\in S\})$.
+
+An oracle $\Oracle(H,s,t)$ that computes an $s$-$t$ minimum vertex cut for $H=G$ or $H=G'$.
+\Ensure Finds a minimum vertex cut of $G$ or correctly reports that $\kappa(G) > k$, using $O(n)$ oracle queries and $O\left(n^2\right)$ extra time.
+
+\State $C_{\min} \gets V$ \Comment{\textit{the current minimum vertex cut of $G$}}
+\ForAll{$u,v\in S$ with $u\ne v$, $\{u,v\}\notin E[G[S]]$}
+
+\Comment{\textit{loop 1: iterate over all possible unordered pairs of vertices in $S$}}
+    \State $C \gets \Oracle(G,u,v)$ \Comment{\textit{query inside $G$}}
+    \If{$|C| < |C_{\min}|$}
+        \State $C_{\min} \gets C$ \Comment{\textit{update when a smaller one is found}}
+    \EndIf
+\EndFor
+\ForAll{$v \in V\setminus S$} \Comment{\textit{loop 2: iterate over all vertices in $V\setminus S$ with $r$}}
+    \State $C \gets \Oracle(G',r,v)$ \Comment{\textit{query inside $G'$}}
+    \If{$|C| < |C_{\min}|$}
+        \State $C_{\min} \gets C$ \Comment{\textit{update when a smaller one is found}}
+    \EndIf
+\EndFor
+\If{$|C_{\min}| \le k$} \Comment{\textit{report a minimum vertex cut}}
+    \State \Return $C_{\min}$
+\Else \Comment{\textit{report otherwise}}
+    \State \Return `$\kappa(G) > k$'
+\EndIf
+\end{algorithmic}
+\end{algorithm}
+
+It is easy to see that, even in the worst case, the first loop takes at most $O\left(k^2\right)=O(n)$ oracle queries on $G$ and the second loop takes $n-(k+1)\in O(n)$ oracle queries on $G'$. Construction of $G'$ and looping over all pairs/vertices takes $O\left(n^2\right)$ extra time in the worst case. Thus the time complexity constraint is satisfied.
+
+We now show that the algorithm always gives a correct output. First, we prove a useful lemma.
+\begin{lemma}\label{p4}
+In the algorithm, all vertex cuts from oracle calls have size $\ge\kappa(G)$.
+\begin{proof}
+In the first loop, any oracle call on $(G,u,v)$ returns a set $C$ whose size is $\kappa_G(u,v)$ by definition. Thus $|C|=\kappa_G(u,v)\ge\min_{s\ne t}\kappa_G(s, t)=\kappa(G)$.
+
+In the second loop, any oracle call on $(G',r,v)$ returns a set $C$ with $|C|\le k$. As $|S|=k+1$, there exists some $s'$ in $S$ but not in $C$. We show that $C$ is also a vertex cut in $G$, so that $|C|\le\kappa(G)$. Suppose otherwise, so that $G-C$ is connected and there exists a path from $s'$ to $v$. From the construction of $G'$, $r$ is adjacent to $s'$, so in $G'-C$ there exists a path from $r$ to $v$, which gives a contradiction.
+\end{proof}
+\end{lemma}
+Now let $C$ be a minimum vertex cut of $G$ such that $|C| \le k$. By definition, removing $C$ from $G$ partitions the remaining vertices into at least two non-empty, disconnected components. Denote one of these components by $L$ and the union of all other components by $R$. Consider the two possible cases:
+\begin{enumerate}
+\item $S$ intersects at least two disconnected components of $G \setminus C$.
+
+For $u,v\in S$, WLOG say that $u\in L$ and $v\in R$. Because $u$ and $v$ are in disconnected components of $G \setminus C$, any path between $u$ and $v$ in $G$ must pass through $C$. Thus, $C$ is a $u$-$v$ vertex cut in $G$, which will be found during the first loop in our algorithm.
+\item $S$ intersects at most one disconnected component of $G \setminus C$.
+
+WLOG say that $S$ intersects $L$ but not $R$. Thus $S\subseteq L \cup C$, so that any $v \in R$ also satisfies $v \in V \setminus S$. In $G'$, because $r$ is connected only to the vertices in $S$, any path from $r$ to $v$ must pass through $S$, and consequently through $L \cup C$. But since there are no direct edges between $L$ and $R$ in $G$, any path originating from $L$ to $v \in R$ must pass through $C$. Therefore, any path from $r$ to $v$ in $G'$ must also pass through $C$. Thus, $C$ is an $r$-$v$ vertex cut in $G'$, which will be found during the second loop in our algorithm.
+\end{enumerate}
+Thus in both cases, if such a $C$ exists, the algorithm is guaranteed to find it. By Lemma \ref{p4}, this covers the case where $\kappa(G)\le k$. Otherwise we must have $\kappa(G) > k$, which is what the algorithm reports if $|C_{\min}|>k$ at the end.
+
+Thus the algorithm either finds a minimum vertex cut of $G$ or correctly reports that $\kappa(G) > k$, as required.
+\end{enumerate}
+\end{document}
