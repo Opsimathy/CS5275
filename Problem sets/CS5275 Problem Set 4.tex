@@ -1,0 +1,130 @@
+\documentclass[12pt]{article}
+\usepackage[a4paper, margin=1in]{geometry}
+\usepackage{amsmath, amssymb, hyperref, enumitem, bm}
+\newcommand{\x}{\bm{x}}
+\newcommand{\y}{\bm{y}}
+\newcommand{\z}{\bm{z}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\maj}{\mathrm{Maj}_n}
+\DeclareMathOperator{\dist}{dist}
+\DeclareMathOperator{\sgn}{sgn}
+\DeclareMathOperator{\I}{I}
+\DeclareMathOperator{\V}{Var}
+\DeclareMathOperator{\vol}{vol}
+\title{CS5275 Problem Set 4}
+\author{Li Jiaru (Student ID: A0332008U)}
+\date{\today}
+\begin{document}
+\maketitle
+\paragraph{Problem 1}
+\begin{enumerate}[label=\alph*., font=\bfseries]
+\item[] We will (a) give an algorithm that uses exactly $n$ queries, and show that it is (b) correct and (c) optimal.
+\item For each $i\in[n]$, query $f$ at $x^{(i)}$ defined by $$x^{(i)}_j=\begin{cases}
+1,&j\ne i,\\-1,&j=i,\end{cases}$$ i.e., its $i^{\text{th}}$ coordinate is $-1$ and all other coordinates are $1$. Set $S$ to be the set of all values of $i$ such that the query outputs $-1$. Finally, output $f$ with $f(x)=\chi_S(x)$.
+\item For any $i\in[n]$ and $S\subseteq [n]$, by definition we have $$f\left(x^{(i)}\right)=\chi_S\left(x^{(i)}\right)=\prod_{j\in S}x^{(i)}_j.$$ By definition of $x^{(i)}$, if $i\not\in S$, then every factor in the product is $1$, so $f\left(x^{(i)}\right)=1$, and if $i\in S$, then exactly one factor is $-1$, so $f\left(x^{(i)}\right)=-1$. Thus by enumerating all $i\in[n]$, the algorithm correctly finds the set $S$ and hence the function $f$.
+\item Note that $f$ is determined by the set $S\subseteq [n]$ and there are $2^n$ subsets of $[n]$. As each query has exactly $2$ possible outcomes, $1$ or $-1$, there are $2^k$ possible outcomes in total with $k$ queries. For any algorithm to be correct in the worst case, it must be able to uniquely identify all $2^n$ possible $f$, so we must have $2^k\ge 2^n\implies k\ge n$, and thus at least $n$ queries is required.
+\end{enumerate}
+\newpage
+\paragraph{Problem 2}
+\begin{enumerate}[label=\alph*., font=\bfseries]
+\item Consider the Fourier expansion of $f$ as $$f(x)=\sum_{S\subseteq [n]}\hat{f}(S)\chi_S(x),\quad\chi_S(x)=(-1)^{\sum_{i\in S}x_i}.$$
+By definition we have \begin{align*}\chi_S(x+y+z)&=(-1)^{\sum_{i\in S}(x+y+z)_i}=(-1)^{\sum_{i\in S}x_i+\sum_{i\in S}y_i+\sum_{i\in S}z_i}\\&=(-1)^{\sum_{i\in S}x_i}(-1)^{\sum_{i\in S}y_i}(-1)^{\sum_{i\in S}z_i}=\chi_S(x)\chi_S(y)\chi_S(z).\end{align*}
+Thus we can write
+\begin{align*}
+f(x)f(y)f(z)f(x+y+z)
+&=\sum_{A\subseteq[n]} \hat f(A)\chi_A(x)
+\sum_{B\subseteq[n]} \hat f(B)\chi_B(y)\\
+&\phantom{{}={}}\sum_{C\subseteq[n]} \hat f(C)\chi_C(z)
+\sum_{D\subseteq[n]} \hat f(D)\chi_D(x+y+z)\\
+&=\sum_{A,B,C,D\subseteq[n]}\hat f(A)\hat f(B)\hat f(C)\hat f(D)\chi_A(x)\chi_B(y)\chi_C(z)\chi_D(x+y+z),
+\end{align*}
+where
+\begin{align*}
+\chi_A(x)\chi_B(y)\chi_C(z)\chi_D(x+y+z)&=\chi_A(x)\chi_B(y)\chi_C(z)\chi_D(x)\chi_D(y)\chi_D(z)\\&=\left(\chi_A(x)\chi_D(x)\right)\left(\chi_B(y)\chi_D(y)\right)\left(\chi_C(z)\chi_D(z)\right).
+\end{align*}
+Recall that the expectation $$\E\left[\chi_S\chi_T\right]=\begin{cases}1,&S=T,\\0,&S\ne T.\end{cases}$$
+Therefore, by linearity of expectation,
+\begin{align*}
+\E\left[f(\x)f(\y)f(\z)f(\x+\y+\z)\right]=\sum_{A,B,C,D\subseteq[n]}&\hat f(A)\hat f(B)\hat f(C)\hat f(D)\\&\E\left[\chi_A(\x)\chi_D(\x)\right]\E\left[\chi_B(\y)\chi_D(\y)\right]\E\left[\chi_C(\z)\chi_D(\z)\right].
+\end{align*}
+All terms except those with $A=B=C=D$ vanish. Therefore
+\begin{align*}
+\E\left[f(\x)f(\y)f(\z)f(\x+\y+\z)\right]=\sum_{A=B=C=D\subseteq[n]}\hat f(A)\hat f(B)\hat f(C)\hat f(D)=\sum_{S\subseteq[n]}\hat f(S)^4,
+\end{align*}
+as required.
+\newpage
+\item Denote $p:=\Pr_{\x,\y,\z}\left[f(\x)f(\y)f(\z)\ne f(\x+\y+\z)\right]$ to be the required probability.
+
+Note that $$f(x)f(y)f(z)f(x+y+z)=\begin{cases}1,&f(x)f(y)f(z)=f(x+y+z),\\-1,&f(x)f(y)f(z)\ne f(x+y+z).\end{cases}$$
+Thus $\E\left[f(\x)f(\y)f(\z)f(\x+\y+\z)\right]=1(1-p)+(-1)p=1-2p$.
+
+By part (a), we have $$p=\frac{1}{2}\left(1-\sum_{S\subseteq[n]}\hat f(S)^4\right),$$
+so to lower bound $p$, we just need to upper bound $\sum_{S\subseteq[n]}\hat f(S)^4$.
+
+Recall the identity $\hat f(S)=1-2\dist\left(f,\chi_S\right)$. As $f$ is $\varepsilon$-far from every parity function and its negation, by definition we have $\left|\hat f(S)\right|\le1-2\varepsilon$ for every $S\subseteq[n]$.
+
+Denote $a_S:=\hat f(S)^2$. We have $\max_{S\subseteq[n]}a_S\le(1-2\varepsilon)^2$. Also recall the corollary of Parseval's theorem, $\sum_{S\subseteq[n]}a_S=1$.
+
+As $a_S\ge 0$, we have $$a_S^2\le a_S\max_{S\subseteq[n]}a_S\implies\sum_{S\subseteq[n]}a_S^2\le\left(\sum_{S\subseteq[n]}a_S\right)\left(\max_{S\subseteq[n]}a_S\right)\le(1-2\varepsilon)^2.$$
+Hence $$p=\frac{1}{2}\left(1-\sum_{S\subseteq[n]}a_S^2\right)\ge\frac{1}{2}\left(1-(1-2\varepsilon)^2\right)=2\varepsilon(1-\varepsilon).$$
+Note that for $f$ to be $\epsilon$-far, by definition, $$\Pr_{\x}\left[f(\x)\ne\chi_S(\x)\right]\ge\varepsilon\text{ and }\Pr_{\x}\left[f(\x)\ne-\chi_S(\x)\right]\ge\varepsilon.$$
+But for any $x$, either $f(x)=\chi_S(x)$ or $f(x)=-\chi_S(x)$, so
+$$\Pr_{\x}\left[f(\x)\ne\chi_S(\x)\right]+\Pr_{\x}\left[f(\x)\ne-\chi_S(\x)\right]=1\implies\varepsilon\le\frac 1 2.$$
+Thus $p\ge2\varepsilon(1-\varepsilon)\ge\varepsilon\in\Omega(\varepsilon)$ as required.
+\end{enumerate}
+\newpage
+\paragraph{Problem 3}
+\begin{enumerate}[label=(\roman*)]
+\item[] Recall the following definitions: for all $x, y\in\{-1,1\}^n$,
+\begin{itemize}
+\item $f$ is monotone: $f(x)\le f(y)$ whenever $x_i\le y_i$ for all $i$,
+\item $f$ is odd: $f(-x)=-f(x)$,
+\item $f$ is symmetric: $f\left(x^\pi\right)=f(x)$ for all permutations $\pi\in S_n$.
+\end{itemize}
+\item We first prove that $n$ is odd. Suppose otherwise. Then we can construct $x=(1,\dots,1,-1,\dots,-1)$ with an equal number of $1$'s and $-1$'s. As $f$ is odd, we have $f(-x)=-f(x)$. But note that $-x=(-1,\dots,-1,1,\dots,1)$ is a permutation of $x$. As $f$ is symmetric, we have $f(-x)=f(x)$, so $f(x)=0$. But the range of $f$ is $\{-1,1\}$, so contradiction.
+\item Now we show that $f=\maj$, the majority function.
+
+As $f$ is symmetric, its value only depends on the number of $1$'s in the input. In other words, there exists a function $g:\{0,1,\dots,n\}\to\{-1,1\}$ such that $f(x)=g(k)$ for $k=|\{i:x_i=1\}|$.
+
+As $f$ is odd, $f(-x)=-f(x)$, and if $x$ has $k$ $1$'s, then $-x$ has $n-k$ $1$'s. Hence $g(n-k)=-g(k)$. As $n$ is odd, take $k=\dfrac{n-1}{2}$, so that $\displaystyle g\left(\frac{n+1}{2}\right)=-g\left(\frac{n-1}{2}\right)$.
+
+As $f$ is monotone, flipping $-1$'s to $1$'s cannot decrease its value. Thus $g$ is also non-decreasing. Hence $\displaystyle g\left(\frac{n-1}{2}\right)\le g\left(\frac{n+1}{2}\right)$.
+
+As the range of $g$ is $\{-1,1\}$, we must have $g\left(\dfrac{n-1}{2}\right)=-1$ and $g\left(\dfrac{n+1}{2}\right)=1$. But $g$ is non-decreasing, which implies
+$$g(k)=\begin{cases}-1,&k\le\dfrac{n-1}{2},\\1,&k\ge\dfrac{n+1}{2}.\end{cases}$$
+Therefore by definition
+$$f(x)=\begin{cases}-1,&|\{i:x_i=1\}|\le\dfrac{n-1}{2},\\1,&|\{i:x_i=1\}|\ge\dfrac{n+1}{2}.\end{cases}$$
+In the first case, there are more $-1$'s than $1$'s, so $x_1+x_2+\dots+x_n<0$ and $\sgn\left(x_1+x_2+\dots+x_n\right)=-1$. In the second case, there are more $1$'s than $-1$'s, so $x_1+x_2+\dots+x_n>0$ and $\sgn\left(x_1+x_2+\dots+x_n\right)=1$.
+
+Hence we have $f(x)=\sgn\left(x_1+x_2+\dots+x_n\right)\implies f=\maj$ as required.
+\end{enumerate}
+\newpage
+\paragraph{Problem 4}
+\begin{enumerate}[label=\alph*., font=\bfseries]
+\item[] Consider the $d$-dimensional hypercube graph $G=(V, E)$ where $V=\{-1,1\}^d, |V|=2^d$ and $|E|=d2^{d-1}$.
+
+Recall that the conductance is defined as $$\Phi(G)=\min_{S\subseteq V:S\ne V\land S\ne\varnothing}\frac{|E(S,V\setminus S)|}{\min(\vol(S),\vol(V\setminus S))}.$$
+
+WLOG assume that $0<|S|\le|V|/2=2^{d-1}$. As $G$ is $d$-regular, $\vol(S)=d|S|$, and $$\Phi(G)=\min_{S\subseteq V:0<|S|\le2^{d-1}}\frac{|E(S,V\setminus S)|}{d|S|}.$$
+
+To prove that $\Phi(G)=1/d$, we show that (a) $\Phi(G)\ge 1/d$, (b) $\Phi(G)\le 1/d$.
+\item For any $S\subseteq V$ with $0<|S|\le2^{d-1}$, consider its (Boolean) indicator function $f$, $$f(x)=\begin{cases}1,&x\in S,\\-1,&x\notin S.\end{cases}$$
+Then we have $$\Pr[f(\x)=1]=\frac{|S|}{|V|}=\frac{|S|}{2^d},\quad\Pr[f(\x)=-1]=\frac{|V\setminus S|}{|V|}=\frac{2^d-|S|}{2^d}.$$
+Therefore its expectation
+$$\E[f]=1\cdot\Pr[f(\x)=1]+(-1)\cdot\Pr[f(\x)=-1]=\frac{|S|}{2^d}-\frac{2^d-|S|}{2^d}=\frac{|S|}{2^{d-1}}-1.$$
+As the range of $f$ is $\{-1,1\}$, $f(x)^2=1\implies\E\left[f^2\right]=1$. Therefore its variance
+$$\V[f]=\E\left[f^2\right]-\E[f]^2=1-\left(\frac{|S|}{2^{d-1}}-1\right)^2=\frac{2|S|}{2^{d-1}}-\frac{|S|^2}{2^{2(d-1)}}=\frac{|S|\left(2^d-|S|\right)}{2^{2(d-1)}}.$$
+As $0<|S|\le2^{d-1}$, we have $|S|\left(2^d-|S|\right)\ge 2^{d-1}|S|$, so
+$$\V[f]\ge\frac{2^{d-1}|S|}{2^{2(d-1)}}=\frac{|S|}{2^{d-1}}.$$
+From Poincar\'{e} inequality, we have $\V[f]\le\I[f]$, so
+$\I[f]\ge\dfrac{|S|}{2^{d-1}}$.
+
+Recall that $\dfrac{\I[f]}{d}$ is the fraction of the edges that cross the cut represented by $f$ in the $d$-dimensional hypercube. In this case, this means
+$$\frac{\I[f]}{d}=\frac{|E(S,V\setminus S)|}{|E|}=\frac{|E(S,V\setminus S)|}{d2^{d-1}}\implies|E(S,V\setminus S)|=2^{d-1}\I[f]\ge|S|.$$
+Hence the conductance
+$$\Phi(G)=\min_{S\subseteq V:0<|S|\le2^{d-1}}\frac{|E(S,V\setminus S)|}{d|S|}\ge\frac{|S|}{d|S|}=\frac{1}{d}.$$
+\item Take the set $S=\{x\in\{-1,1\}^d:x_1=1\}$, i.e., where the first coordinate is $1$. Then $|S|=2^{d-1}$. Note that any edges between $S$ and $V\setminus S$ must have their first coordinate flipped. There are $2^{d-1}$ such edges as all the other $d-1$ coordinates are free. Hence
+$$\Phi(G)\le\frac{|E(S,V\setminus S)|}{d|S|}=\frac{2^{d-1}}{d2^{d-1}}=\frac{1}{d}.$$
+From parts (a) and (b), we conclude that $\Phi(G)=1/d$ as required.
+\end{enumerate}
+\end{document}
